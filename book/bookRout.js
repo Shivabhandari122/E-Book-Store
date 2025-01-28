@@ -69,8 +69,9 @@ router.delete("/books/:id", async (req, res) => {
   const id = req.params.id;
   const book = await Book.findById(id);
   const imageName = book.coverImage;
-
-  fs.unlink(`storage/${imageName}`, (err) => {
+  const localHostUrlLength = "http://localhost:3000/".length;
+  const newOldImagePath = imageName.slice(localHostUrlLength);
+  fs.unlink(`storage/${newOldImagePath}`, (err) => {
     if (err) {
       console.log(err);
     } else {
@@ -92,11 +93,13 @@ router.patch("/books/:id", upload.single("coverImage"), async (req, res) => {
 
   //update with image
   if (req.file) {
-    imageName = req.file.filename;
+    imageName = "http://localhost:3000/" + req.file.filename;
     const book = await Book.findById(id);
     const oldImageName = book.coverImage;
-
-    fs.unlink(`storage/${oldImageName}`, (err) => {
+    console.log(imageName, oldImageName);
+    const localHostUrlLength = "http://localhost:3000/".length;
+    const newOldImagePath = oldImageName.slice(localHostUrlLength);
+    fs.unlink(`storage/${newOldImagePath}`, (err) => {
       if (err) {
         console.log(err);
       } else {
@@ -112,6 +115,7 @@ router.patch("/books/:id", upload.single("coverImage"), async (req, res) => {
     category: category,
     oldPrice: oldPrice,
     newPrice: newPrice,
+    coverImage: imageName,
   });
   res.status(200).json({
     message: "book updated succesfully",
